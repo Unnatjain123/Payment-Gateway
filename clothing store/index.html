@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous" />
+  <script src="https://kit.fontawesome.com/fa6533ee52.js" crossorigin="anonymous"></script>
+  <link rel="icon" href="ujain.png">
+  <title>UJ Electronics Payment Gateway</title>
+  <style>
+    /* Reset and base styles */
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      background: #f4f7f8;
+      color: #333;
+    }
+
+    header {
+      background: #0077cc;
+      color: #fff;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 6px rgb(0 0 0 / 0.1);
+    }
+
+    header h1 {
+      margin: 0;
+      font-weight: 700;
+      font-size: 1.5rem;
+      letter-spacing: 1px;
+    }
+
+    header nav button {
+      background: #005fa3;
+      border: none;
+      color: #fff;
+      padding: 0.5rem 1.2rem;
+      border-radius: 3px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: background 0.3s ease;
+    }
+
+    header nav button:hover {
+      background: #00427a;
+    }
+
+    main {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+
+    .products {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .product-card {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 6px 10px rgb(0 0 0 / 0.08);
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s ease;
+    }
+
+    .product-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 15px rgb(0 0 0 / 0.15);
+    }
+
+    .product-image {
+      width: 100%;
+      height: 180px;
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
+      object-fit: cover;
+    }
+
+    .product-info {
+      padding: 1rem;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .product-name {
+      margin: 0 0 0.5rem 0;
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+
+    .product-desc {
+      flex-grow: 1;
+      font-size: 0.9rem;
+      color: #555;
+      margin-bottom: 0.8rem;
+    }
+
+    .product-price {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #0077cc;
+      margin-bottom: 1rem;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    button.btn {
+      flex: 1;
+      padding: 0.6rem 0;
+      font-weight: 600;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      user-select: none;
+    }
+
+    button.btn-add {
+      background-color: #00b894;
+      color: white;
+    }
+
+    button.btn-add:hover {
+      background-color: #019f79;
+    }
+
+    button.btn-buy {
+      background-color: #0984e3;
+      color: white;
+    }
+
+    button.btn-buy:hover {
+      background-color: #065fab;
+    }
+
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 999;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgb(0 0 0 / 0.5);
+      backdrop-filter: blur(3px);
+    }
+
+    .modal-content {
+      background-color: #fefefe;
+      margin: 5% auto;
+      padding: 2rem;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 10px 25px rgb(0 0 0 / 0.2);
+      position: relative;
+    }
+
+    .close-button {
+      color: #999;
+      font-size: 26px;
+      font-weight: 700;
+      position: absolute;
+      right: 1.5rem;
+      top: 1rem;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .close-button:hover {
+      color: #333;
+    }
+
+    #cart-items {
+      max-height: 250px;
+      overflow-y: auto;
+      margin-bottom: 1rem;
+      border-top: 1px solid #ddd;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .cart-item:last-child {
+      border-bottom: none;
+    }
+
+    .cart-item-name {
+      font-weight: 600;
+      flex: 1;
+    }
+
+    .cart-item-qty {
+      margin: 0 1rem;
+      width: 50px;
+      text-align: center;
+    }
+
+    .cart-item-price {
+      width: 70px;
+      text-align: right;
+      font-weight: 600;
+      color: #0077cc;
+    }
+
+    .cart-item-remove {
+      background: none;
+      border: none;
+      color: #e74c3c;
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    .cart-summary {
+      font-size: 1.3rem;
+      text-align: right;
+      margin-bottom: 1rem;
+    }
+
+    #checkout-button {
+      width: 100%;
+      padding: 0.8rem;
+      font-size: 1.1rem;
+      font-weight: 700;
+      background-color: #0984e3;
+      border: none;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    #checkout-button:disabled {
+      background-color: #a5c5f9;
+      cursor: not-allowed;
+    }
+
+    #checkout-button:hover:not(:disabled) {
+      background-color: #065fab;
+    }
+
+    /* Payment form styles */
+    #payment-form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    #payment-form label {
+      margin: 0.5rem 0 0.2rem 0;
+      font-weight: 600;
+    }
+
+    #payment-form input {
+      padding: 0.6rem;
+      font-size: 1rem;
+      border: 1px solid #bbb;
+      border-radius: 6px;
+    }
+
+    #payment-form button {
+      margin-top: 1.2rem;
+      background-color: #00b894;
+      border: none;
+      color: white;
+      font-weight: 700;
+      padding: 0.8rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    #payment-form button:hover {
+      background-color: #019f79;
+    }
+
+    #payment-message {
+      margin-top: 1rem;
+      font-weight: 700;
+      color: #067d30;
+      user-select: none;
+    }
+
+    @media (max-width: 600px) {
+      header {
+        flex-direction: column;
+        gap: 0.8rem;
+        text-align: center;
+      }
+
+      header nav button {
+        width: 100%;
+      }
+
+      .container {
+        background-color: orange;
+        height: 425px;
+      }
+
+      .footer {
+        padding-top: 15px;
+        padding-bottom: 25px;
+        display: grid;
+        grid-template-columns: 230px 230px 230px 230px;
+        justify-content: space-evenly;
+      }
+
+      .nav-ul {
+        list-style-type: none;
+        font-size: 1.5rem;
+        padding: 0;
+      }
+
+      .nav-li {
+        margin-bottom: 25px;
+        color: #554348;
+      }
+
+      .nav-li:hover {
+        text-decoration: underline;
+      }
+
+      .copyright {
+        display: grid;
+        justify-content: center;
+        padding: 10px;
+        font-size: 1.5rem;
+        font-weight: 700;
+      }
+
+      .fa-copyright:hover {
+        color: black;
+      }
+
+      .nav-con {
+        list-style-type: none;
+      }
+
+      .fa-laptop-code:hover {
+        color: black;
+      }
+
+      .con-dev:hover {
+        text-decoration: underline;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <logo><img src="uj-immobilien.png" width="120px" height="80px" /></logo>
+    <h1>UJ Electronics</h1>
+    <nav>
+      <button id="cart-button" aria-label="View cart">
+        Cart (<span id="cart-count">0</span>)
+      </button>
+    </nav>
+  </header>
+  <main>
+    <section class="products" id="products-list" aria-live="polite" aria-label="Product list">
+      <!-- products generated by script -->
+    </section>
+  </main>
+
+  <div id="cart-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="cart-modal-title"
+    aria-hidden="true">
+    <div class="modal-content">
+      <span class="close-button" id="close-cart" role="button" aria-label="Close cart modal">&times;</span>
+      <h2 id="cart-modal-title">Your Cart</h2>
+      <div id="cart-items" tabindex="0"></div>
+      <div class="cart-summary">
+        <strong>Total:</strong> $<span id="cart-total">0.00</span>
+      </div>
+      <button id="checkout-button" disabled>Proceed to Checkout</button>
+    </div>
+  </div>
+
+  <div id="payment-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="payment-modal-title"
+    aria-hidden="true">
+    <div class="modal-content">
+      <span class="close-button" id="close-payment" role="button" aria-label="Close payment modal">&times;</span>
+      <h2 id="payment-modal-title">Payment Gateway</h2>
+      <form id="payment-form">
+        <label for="card-name">Name on Card:</label>
+        <input type="text" id="card-name" name="cardName" autocomplete="cc-name" required />
+        <label for="card-number">Card Number:</label>
+        <input type="text" id="card-number" name="cardNumber" pattern="\\d{16}" maxlength="16" autocomplete="cc-number"
+          inputmode="numeric" required />
+        <label for="expiry-date">Expiry Date (MM/YY):</label>
+        <input type="text" id="expiry-date" name="expiryDate" pattern="(0[1-9]|1[0-2])\\/\\d{2}" placeholder="MM/YY"
+          required />
+        <label for="cvv">CVV:</label>
+        <input type="password" id="cvv" name="cvv" pattern="\\d{3}" maxlength="3" autocomplete="cc-csc"
+          inputmode="numeric" required />
+        <button type="submit">Pay Now</button>
+      </form>
+      <div id="payment-message" role="alert" aria-live="assertive"></div>
+    </div>
+  </div>
+  <script>
+    // Products data
+    const products = [
+      {
+        id: "p1",
+        name: "Xiaomi QLED TV FX pro 43",
+        description:
+          "Xiaomi 108 cm (43 Inches) FX Pro Series 4K Ultra HD Smart Fire QLED TV L43MB-FPIN",
+        price: 27999,
+        image: "https://m.media-amazon.com/images/I/71RkWGWWrjL._SL1500_.jpg",
+      },
+      {
+        id: "p2",
+        name: "Xiaomi QLED TV FX pro 55",
+        description:
+          "Xiaomi 138 cm (55 Inches) FX Pro Series 4K Ultra HD Smart Fire QLED TV L55MB-FPIN.",
+        price: 39999,
+        image: "https://m.media-amazon.com/images/I/81CxO98dMBL._SL1500_.jpg",
+      },
+      {
+        id: "p3",
+        name: "Canon Camera",
+        description:
+          "Canon EOS R6 Mark II 24. 2 MP Mirrorless Camera with RF24-105mm f4 L is USM Lens Kit (Black)",
+        price: 255999,
+        image: "https://m.media-amazon.com/images/I/61JQs+UNEdL._SL1500_.jpg",
+      },
+      {
+        id: "p4",
+        name: "Sony Camera",
+        description:
+          "Sony Alpha ZV-E10L APS-C Camera (16-50mm Lens) | 24.2 MP vlog Camera | Made for Creators | Advanced Autofocus | Clear Audio & 4K Movie Recording - Black.",
+        price: 65600,
+        image: "https://m.media-amazon.com/images/I/71vct-nunyL._SL1500_.jpg",
+      },
+      {
+        id: "p5",
+        name: "Alexa Smart Home",
+        description:
+          "Amazon Echo (4th Gen) | Premium sound powered by Dolby and Alexa (Black)",
+        price: 10500,
+        image: "https://m.media-amazon.com/images/I/41f80Qu98zL.jpg",
+      },
+      {
+        id: "p6",
+        name: "Samsung Galaxy S24",
+        description:
+          "Samsung Galaxy S24 Ultra 5G AI Smartphone (Titanium Gray, 12GB, 256GB Storage)",
+        price: 85999,
+        image: "https://m.media-amazon.com/images/I/711a+C6Yu7L._SL1500_.jpg",
+      },
+
+      {
+        id: "p7",
+        name: "Wireless Earbuds",
+        description:
+          "High-quality wireless headphones with noise cancellation.",
+        price: 5600,
+        image: "https://m.media-amazon.com/images/I/612FzKUOH1L._SL1500_.jpg",
+      },
+      {
+        id: "p8",
+        name: "Smart Watch",
+        description:
+          "Stay connected and track your fitness with this smart watch.",
+        price: 12989,
+        image:
+          "https://m.media-amazon.com/images/S/al-eu-726f4d26-7fdb/3ea0033f-8eb3-4992-bd56-a9d953748b0c._CR0,0,1200,628_SX810_CB1169409_QL70_.jpg",
+      },
+      {
+        id: "p9",
+        name: "Bluetooth Speaker",
+        description: "Portable Bluetooth speaker with amazing sound quality.",
+        price: 14999,
+        image: "https://m.media-amazon.com/images/I/81fkcBjZndL._SL1500_.jpg",
+      },
+      {
+        id: "p10",
+        name: "Gaming Laptop",
+        description:
+          'ASUS TUF Gaming A15, AMD Ryzen 7 7435HS Gaming Laptop(NVIDIA RTX 3050-4GB/60W TGP/16GB RAM/512GB SSD/FHD/15.6"/144Hz/RGB KB/48WHr/Windows 11//Graphite)',
+        price: 64899,
+        image: "https://m.media-amazon.com/images/I/61nTNphSBvL._SL1500_.jpg",
+      },
+    ];
+
+    // Cart state
+    let cart = [];
+
+    // Elements
+    const productsList = document.getElementById("products-list");
+    const cartButton = document.getElementById("cart-button");
+    const cartCount = document.getElementById("cart-count");
+    const cartModal = document.getElementById("cart-modal");
+    const closeCartBtn = document.getElementById("close-cart");
+    const cartItemsContainer = document.getElementById("cart-items");
+    const cartTotalSpan = document.getElementById("cart-total");
+    const checkoutButton = document.getElementById("checkout-button");
+
+    const paymentModal = document.getElementById("payment-modal");
+    const closePaymentBtn = document.getElementById("close-payment");
+    const paymentForm = document.getElementById("payment-form");
+    const paymentMessage = document.getElementById("payment-message");
+
+    // Helper functions
+    function formatPrice(price) {
+      return price.toFixed(2);
+    }
+
+    // Render products list
+    function renderProducts() {
+      productsList.innerHTML = "";
+      products.forEach((product) => {
+        const card = document.createElement("article");
+        card.className = "product-card";
+        card.setAttribute("tabindex", "0");
+        card.setAttribute(
+          "aria-label",
+          `${product.name}, Price $${formatPrice(product.price)}`
+        );
+        card.innerHTML = `
+        <img src="${product.image}" alt="${product.name
+          }" class="product-image" />
+        <div class="product-info">
+          <h3 class="product-name">${product.name}</h3>
+          <p class="product-desc">${product.description}</p>
+          <div class="product-price"> Total Price ₹${formatPrice(
+            product.price
+          )}</div>
+          <div class="button-group">
+            <button class="btn btn-add" data-product-id="${product.id
+          }" aria-label="Add ${product.name} to cart">Add to Cart</button>
+            <button class="btn btn-buy" data-product-id="${product.id
+          }" aria-label="Buy ${product.name} now">Buy Now</button>
+          </div>
+        </div>
+      `;
+        productsList.appendChild(card);
+      });
+    }
+
+    // Add product to cart
+    function addToCart(productId) {
+      const product = products.find((p) => p.id === productId);
+      if (!product) return;
+
+      const cartItem = cart.find((item) => item.id === productId);
+      if (cartItem) {
+        cartItem.quantity++;
+      } else {
+        cart.push({ ...product, quantity: 1 });
+      }
+      updateCartUI();
+    }
+
+    // Remove product from cart
+    function removeFromCart(productId) {
+      cart = cart.filter((item) => item.id !== productId);
+      updateCartUI();
+    }
+
+    // Change cart item quantity
+    function changeQuantity(productId, newQty) {
+      const cartItem = cart.find((item) => item.id === productId);
+      if (!cartItem) return;
+      const quantity = parseInt(newQty);
+      if (isNaN(quantity) || quantity < 1) return;
+      cartItem.quantity = quantity;
+      updateCartUI();
+    }
+
+    // Calculate total
+    function calculateTotal() {
+      return cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    }
+
+    // Update cart UI
+    function updateCartUI() {
+      cartCount.textContent = cart.reduce(
+        (sum, item) => sum + item.quantity,
+        0
+      );
+      cartItemsContainer.innerHTML = "";
+      if (cart.length === 0) {
+        cartItemsContainer.innerHTML = "<p>Your cart is empty.</p>";
+        checkoutButton.disabled = true;
+        cartTotalSpan.textContent = "0.00";
+        return;
+      }
+      cart.forEach((item) => {
+        const itemDiv = document.createElement("div");
+        itemDiv.className = "cart-item";
+        itemDiv.innerHTML = `
+        <span class="cart-item-name">${item.name}</span>
+        <input type="number" min="1" max="99" class="cart-item-qty" aria-label="Quantity for ${item.name
+          }" value="${item.quantity}" data-id="${item.id}" />
+        <span class="cart-item-price">$${formatPrice(
+            item.price * item.quantity
+          )}</span>
+        <button class="cart-item-remove" aria-label="Remove ${item.name
+          } from cart" data-id="${item.id}">&times;</button>
+      `;
+        cartItemsContainer.appendChild(itemDiv);
+      });
+      cartTotalSpan.textContent = formatPrice(calculateTotal());
+      checkoutButton.disabled = false;
+    }
+
+    // Open modals
+    function openModal(modal) {
+      modal.style.display = "block";
+      modal.setAttribute("aria-hidden", "false");
+      // Trap focus inside modal
+      trapFocus(modal);
+    }
+    function closeModal(modal) {
+      modal.style.display = "none";
+      modal.setAttribute("aria-hidden", "true");
+      // Return focus to cart button if cart modal closed
+      if (modal === cartModal) {
+        cartButton.focus();
+      }
+    }
+
+    // Trap focus inside modal for accessibility
+    let lastFocusedElement;
+    function trapFocus(modal) {
+      lastFocusedElement = document.activeElement;
+      const focusableElementsString =
+        'a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, object, embed, [tabindex="0"], [contenteditable]';
+      const focusableElements = modal.querySelectorAll(
+        focusableElementsString
+      );
+      if (focusableElements.length === 0) return;
+
+      const firstFocusable = focusableElements[0];
+      const lastFocusable = focusableElements[focusableElements.length - 1];
+
+      firstFocusable.focus();
+
+      function keyListener(e) {
+        if (e.key === "Tab") {
+          if (e.shiftKey) {
+            if (document.activeElement === firstFocusable) {
+              e.preventDefault();
+              lastFocusable.focus();
+            }
+          } else {
+            if (document.activeElement === lastFocusable) {
+              e.preventDefault();
+              firstFocusable.focus();
+            }
+          }
+        } else if (e.key === "Escape") {
+          closeModal(modal);
+          document.removeEventListener("keydown", keyListener);
+        }
+      }
+      document.addEventListener("keydown", keyListener);
+    }
+
+    // Event handlers
+    productsList.addEventListener("click", (e) => {
+      if (e.target.matches("button.btn-add")) {
+        const productId = e.target.getAttribute("data-product-id");
+        addToCart(productId);
+      } else if (e.target.matches("button.btn-buy")) {
+        const productId = e.target.getAttribute("data-product-id");
+        cart = [];
+        addToCart(productId);
+        openModal(paymentModal);
+      }
+    });
+
+    cartButton.addEventListener("click", () => {
+      if (cart.length === 0) {
+        alert("Your cart is empty.");
+        return;
+      }
+      openModal(cartModal);
+      updateCartUI();
+    });
+
+    closeCartBtn.addEventListener("click", () => {
+      closeModal(cartModal);
+    });
+
+    closePaymentBtn.addEventListener("click", () => {
+      closeModal(paymentModal);
+      paymentForm.reset();
+      paymentMessage.textContent = "";
+    });
+
+    cartItemsContainer.addEventListener("change", (e) => {
+      if (e.target.classList.contains("cart-item-qty")) {
+        const productId = e.target.getAttribute("data-id");
+        changeQuantity(productId, e.target.value);
+      }
+    });
+
+    cartItemsContainer.addEventListener("click", (e) => {
+      if (e.target.classList.contains("cart-item-remove")) {
+        const productId = e.target.getAttribute("data-id");
+        removeFromCart(productId);
+      }
+    });
+
+    checkoutButton.addEventListener("click", () => {
+      closeModal(cartModal);
+      openModal(paymentModal);
+      paymentForm.reset();
+      paymentMessage.textContent = "";
+    });
+
+    paymentForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      paymentMessage.textContent = "";
+      // Simulate payment validation and processing
+      const formData = new FormData(paymentForm);
+      const cardName = formData.get("cardName").trim();
+      const cardNumber = formData.get("cardNumber").trim();
+      const expiryDate = formData.get("expiryDate").trim();
+      const cvv = formData.get("cvv").trim();
+
+      if (
+        cardName.length < 3 ||
+        !/^\d{16}$/.test(cardNumber) ||
+        !/^(0[1-9]|1[0-2])\/\d{2}$/.test(expiryDate) ||
+        !/^\d{3}$/.test(cvv)
+      ) {
+        paymentMessage.textContent = "Please enter valid payment details.";
+        paymentMessage.style.color = "#e74c3c";
+        return;
+      }
+      paymentMessage.style.color = "#067d30";
+      paymentMessage.textContent = "Processing payment...";
+
+      setTimeout(() => {
+        paymentMessage.textContent =
+          "Payment successful! Thank you for your purchase.";
+        cart = [];
+        updateCartUI();
+        checkoutButton.disabled = true;
+        paymentForm.reset();
+        setTimeout(() => {
+          closeModal(paymentModal);
+        }, 2500);
+      }, 2000);
+    });
+
+    // Clicking outside modal closes them
+    window.addEventListener("click", (e) => {
+      if (e.target === cartModal) {
+        closeModal(cartModal);
+      } else if (e.target === paymentModal) {
+        closeModal(paymentModal);
+        paymentForm.reset();
+        paymentMessage.textContent = "";
+      }
+    });
+
+    // Escape key closes modals (already handled in trapFocus)
+
+    // Initialization
+    renderProducts();
+    updateCartUI();
+  </script>
+</body>
+
+</html>
